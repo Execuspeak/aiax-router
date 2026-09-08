@@ -44,7 +44,10 @@ export const codexAdapter: Adapter = {
       lastMessage,
       '-C',
       opts.cwd,
-      '--dangerously-bypass-approvals-and-sandbox',
+      '--sandbox',
+      'read-only',
+      '--ephemeral',
+      '--ignore-user-config',
       '--skip-git-repo-check',
     ];
     if (opts.effort) args.push('-c', `model_reasoning_effort="${opts.effort}"`);

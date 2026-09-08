@@ -66,6 +66,22 @@ export function lastUserText(messages: ChatMessage[]): string {
   return '';
 }
 
+/** Preserve system instructions and conversation context for OpenAI-compatible callers. */
+export function conversationTask(messages: ChatMessage[]): string {
+  return messages
+    .map((message) => {
+      const role = typeof message?.role === 'string' ? message.role : 'unknown';
+      const content = typeof message?.content === 'string'
+        ? message.content
+        : Array.isArray(message?.content)
+          ? message.content.map((part: any) => typeof part === 'string' ? part : typeof part?.text === 'string' ? part.text : '').join('')
+          : '';
+      return content.trim() ? `<${role}>\n${content.trim()}\n</${role}>` : '';
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 /** "aiax/<provider>/<model>" pins the pair; anything else routes. */
 export function forcedPair(model: unknown): { provider: string; model: string } | null {
   if (typeof model !== 'string') return null;
@@ -103,11 +119,12 @@ async function chatCompletions(req: IncomingMessage, res: ServerResponse): Promi
   }
 
   const messages: ChatMessage[] = Array.isArray(body?.messages) ? body.messages : [];
-  const task = lastUserText(messages);
-  if (!task) {
+  const lastUser = lastUserText(messages);
+  if (!lastUser) {
     json(res, 400, { error: { message: 'no user message with text content' } });
     return;
   }
+  const task = conversationTask(messages);
 
   const forced = forcedPair(body?.model);
   let source: AsyncIterable<RunEvent>;
