@@ -12,6 +12,8 @@ if you want to run real tasks (the test suite needs none of them).
 pnpm install
 pnpm build          # compiles src/ to dist/
 pnpm test           # vitest, no network, no vendor CLIs needed
+pnpm typecheck      # src/, scripts/ and test/ together (build alone skips the tests)
+pnpm lint           # the typecheck plus unused-code and missing-return checks
 node dist/cli/index.js doctor
 ```
 
@@ -28,8 +30,10 @@ the board in a browser is the same UI against the same local server.
 ## What a good change looks like
 
 - **Tests come with it.** Everything in `src/core/` is tested by fakes in `test/`; a routing or
-  pipeline change without a test will be asked for one. Run `pnpm test` and `pnpm build` before
-  pushing; CI runs exactly those.
+  pipeline change without a test will be asked for one. Run `pnpm typecheck`, `pnpm lint`,
+  `pnpm build` and `pnpm test` before pushing; CI runs those, plus `pnpm ui:build` and a `doctor`
+  smoke run. `test/routing-data.test.ts` checks the three routing data files against each other,
+  so a hand edit to any of them is covered by `pnpm test`.
 - **User-facing words are plain.** Every string a user sees is one short sentence at an average
   reader's level, honest about what is estimated, and free of jargon and em dashes. This is a
   product rule (PRD P0), not a style preference.

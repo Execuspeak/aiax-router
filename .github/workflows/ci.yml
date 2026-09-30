@@ -5,6 +5,14 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+# A newer push to the same pull request makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -18,6 +26,9 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # src/, scripts/ and test/ together; `pnpm build` alone never looks at the tests.
+      - run: pnpm typecheck
+      - run: pnpm lint
       - run: pnpm build
       - run: pnpm test
       # The app UI is its own npm project; typecheck and build it too.
