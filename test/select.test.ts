@@ -232,3 +232,41 @@ describe('select', () => {
     expect(decision).toBeNull();
   });
 });
+
+describe('ROI arithmetic', () => {
+  const model = (name: string, c: Partial<Candidate>): Candidate => ({
+    provider: name,
+    model: name,
+    score: 80,
+    costWeight: 1,
+    tokensPerTask: 1,
+    ...c,
+  });
+  const pick = (candidates: Candidate[], headroom: (p: string) => number = full) =>
+    select({
+      classification: classification('chat', 'easy'),
+      table: table({ chat: candidates }),
+      available: new Set(candidates.map((c) => c.provider)),
+      headroom,
+    })?.provider;
+
+  it('prefers the model that needs fewer tokens for the same score and price', () => {
+    expect(pick([model('hungry', { tokensPerTask: 2 }), model('lean', { tokensPerTask: 1 })])).toBe(
+      'lean',
+    );
+  });
+
+  it('does not let a free-tier cost weight of zero win on price alone', () => {
+    // Spend is floored at a quarter, so a free model is cheap but not infinitely so.
+    expect(
+      pick([model('free', { score: 50, costWeight: 0 }), model('cheap', { score: 60, costWeight: 0.25 })]),
+    ).toBe('cheap');
+  });
+
+  it('nudges work away from a subscription that is running low', () => {
+    // Both are above the 5% skip line; the lower headroom still costs ROI.
+    const headroom = (p: string) => (p === 'low' ? 0.2 : 1);
+    expect(pick([model('low', { score: 100 }), model('fresh', { score: 80 })], headroom)).toBe('fresh');
+    expect(pick([model('low', { score: 100 }), model('fresh', { score: 80 })])).toBe('low');
+  });
+});

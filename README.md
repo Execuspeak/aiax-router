@@ -85,6 +85,9 @@ pnpm link --global
 aiax-router doctor
 ```
 
+On a fresh pnpm install, `pnpm link --global` may stop with "Unable to find the global bin
+directory". Run `pnpm setup` once, open a new terminal, and run it again.
+
 `doctor` lists every supported CLI, whether it is installed, and whether you are signed in. Tools
 you do not have simply show as not installed. Then:
 

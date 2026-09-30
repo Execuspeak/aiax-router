@@ -86,7 +86,7 @@ describe('checkSkill', () => {
   });
 });
 
-function check(status: Check['status'], id = status): Check {
+function check(status: Check['status'], id: string = status): Check {
   return { id, name: id, repo: 'https://github.com/a/b', path: 'p', status, detail: 'detail' };
 }
 

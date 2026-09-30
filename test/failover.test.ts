@@ -65,6 +65,7 @@ const CLASSIFICATION: Classification = {
   difficulty: 'easy',
   rationale: 'fixture',
   via: 'heuristic',
+  weight: 'full',
 };
 
 async function run(adapters: Adapter[]): Promise<RunEvent[]> {

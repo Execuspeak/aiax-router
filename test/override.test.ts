@@ -36,7 +36,7 @@ const TABLE: RoutingTable = {
   difficultyFloor: { trivial: 0, easy: 40, medium: 65, hard: 80 },
 };
 
-const CLS: Classification = { category: 'coding', difficulty: 'hard', rationale: 'fixture', via: 'heuristic' };
+const CLS: Classification = { category: 'coding', difficulty: 'hard', rationale: 'fixture', via: 'heuristic', weight: 'full' };
 
 describe('routing override', () => {
   it('is off by default and off again after auto', () => {
